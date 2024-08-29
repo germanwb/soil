@@ -2,44 +2,44 @@ import minimalmodbus
 import serial
 import time
 
-# Настройка Modbus RTU для работы с устройством
+# Setting up Modbus RTU to work with the device
 class SoilSensorRS485(minimalmodbus.Instrument):
     def __init__(self, port, slave_address):
         super().__init__(port, slave_address)
-        self.serial.baudrate = 4800  # Скорость передачи данных
-        self.serial.timeout = 10     # Таймаут ответа
+        self.serial.baudrate = 4800  # Data transmission speed
+        self.serial.timeout = 10     # Response timeout
         self.mode = minimalmodbus.MODE_RTU
 
-    # Чтение данных влажности почвы
+    # Reading soil moisture data
     def read_moisture(self):
-        return self.read_register(0, 1)  # Без деления
+        return self.read_register(0, 1)  # No scaling
 
-    # Чтение температуры почвы
+    # Reading soil temperature data
     def read_temperature(self):
-        return self.read_register(1, 1)  # Без деления
+        return self.read_register(1, 1)  # No scaling
 
-    # Чтение уровня pH
+    # Reading soil pH level
     def read_ph(self):
-        return self.read_register(3, 1)  # Без деления
+        return self.read_register(3, 1)  # No scaling
 
-    # Чтение электропроводности (EC), где результат увеличивается для приведения к реальным значениям
+    # Reading electrical conductivity (EC) and scaling the result to real values
     def read_conductivity(self):
         raw_value = self.read_register(2, 1)
-        return raw_value * 100  # Предположительно корректируем значение EC в µS/cm
+        return raw_value * 100  # Scale EC value to µS/cm
 
-# Основная функция работы с датчиком
+# Main function to work with the sensor
 def main():
     try:
-        # Создаем объект для работы с датчиком на порту '/dev/cu.usbserial-311430'
+        # Create an object to work with the sensor on port '/dev/cu.usbserial-311430'
         sensor = SoilSensorRS485(port='/dev/cu.usbserial-311430', slave_address=1)
 
-        # Чтение данных с датчика
+        # Reading data from the sensor
         moisture = sensor.read_moisture()
         temperature = sensor.read_temperature()
         ph = sensor.read_ph()
         conductivity = sensor.read_conductivity()
 
-        # Вывод данных
+        # Displaying the data
         print(f'Soil Moisture: {moisture}%')
         print(f'Soil Temperature: {temperature}°C')
         print(f'Soil pH: {ph}')
