@@ -10,31 +10,22 @@ class SoilSensorRS485(minimalmodbus.Instrument):
         self.serial.timeout = 10     # Таймаут ответа
         self.mode = minimalmodbus.MODE_RTU
 
-    # Чтение данных влажности почвы (значение увеличено в 10 раз)
+    # Чтение данных влажности почвы
     def read_moisture(self):
-        return self.read_register(0, 1) / 10.0
+        return self.read_register(0, 1)  # Без деления
 
-    # Чтение температуры (значение увеличено в 10 раз)
+    # Чтение температуры почвы
     def read_temperature(self):
-        return self.read_register(1, 1) / 10.0
+        return self.read_register(1, 1)  # Без деления
 
-    # Чтение уровня pH (значение увеличено в 10 раз)
+    # Чтение уровня pH
     def read_ph(self):
-        return self.read_register(2, 1) / 10.0
+        return self.read_register(3, 1)  # Без деления
 
-    # Чтение электропроводности (значение увеличено в 10 раз)
+    # Чтение электропроводности (EC), где результат увеличивается для приведения к реальным значениям
     def read_conductivity(self):
-        return self.read_register(3, 1) / 10.0
-
-    # Если есть дополнительные параметры, например, содержание нитрогена, фосфора и калия
-    def read_nitrogen(self):
-        return self.read_register(4, 1)
-
-    def read_phosphorus(self):
-        return self.read_register(5, 1)
-
-    def read_potassium(self):
-        return self.read_register(6, 1)
+        raw_value = self.read_register(2, 1)
+        return raw_value * 100  # Предположительно корректируем значение EC в µS/cm
 
 # Основная функция работы с датчиком
 def main():
@@ -47,18 +38,12 @@ def main():
         temperature = sensor.read_temperature()
         ph = sensor.read_ph()
         conductivity = sensor.read_conductivity()
-        nitrogen = sensor.read_nitrogen()  # Если есть поддержка этих параметров
-        phosphorus = sensor.read_phosphorus()
-        potassium = sensor.read_potassium()
 
         # Вывод данных
         print(f'Soil Moisture: {moisture}%')
         print(f'Soil Temperature: {temperature}°C')
         print(f'Soil pH: {ph}')
         print(f'Soil Conductivity (EC): {conductivity} µS/cm')
-        print(f'Nitrogen Content: {nitrogen} mg/L')
-        print(f'Phosphorus Content: {phosphorus} mg/L')
-        print(f'Potassium Content: {potassium} mg/L')
 
     except Exception as e:
         print(f'Error: {e}')
